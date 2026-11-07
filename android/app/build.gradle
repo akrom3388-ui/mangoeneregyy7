@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+def ksProps = new Properties()
+def ksFile = rootProject.file('keystore.properties')
+if (ksFile.exists()) { ksFile.withInputStream { ksProps.load(it) } }
+// CI: environment variables take priority
+def ksPath = System.getenv('KEYSTORE_FILE') ?: ksProps['storeFile']
+def hasRelease = ksPath != null && file(ksPath).exists()
+
+android {
+    namespace 'uz.mango.monitor'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'uz.mango.monitor'
+        minSdk 24
+        targetSdk 34
+        versionCode 8
+        versionName '3.5.0'
+        buildConfigField 'String', 'SERVER_URL', "\"${project.findProperty('SERVER_URL') ?: 'https://api.example.uz'}\""
+    }
+
+    signingConfigs {
+        if (hasRelease) {
+            release {
+                storeFile file(ksPath)
+                storePassword System.getenv('KEYSTORE_PASSWORD') ?: ksProps['storePassword']
+                keyAlias System.getenv('KEY_ALIAS') ?: ksProps['keyAlias']
+                keyPassword System.getenv('KEY_PASSWORD') ?: ksProps['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasRelease) { signingConfig signingConfigs.release }
+        }
+        debug { applicationIdSuffix '.debug'; versionNameSuffix '-debug' }
+    }
+
+    buildFeatures { buildConfig true }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    kotlinOptions { jvmTarget = '17' }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation 'androidx.work:work-runtime:2.9.0'
+}

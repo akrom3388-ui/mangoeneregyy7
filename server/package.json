@@ -1,0 +1,14 @@
+{
+  "name": "mango-monitor-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mango Monitor backend: Tuya poller, stats, alerts, automation, Alisa",
+  "main": "src/index.js",
+  "scripts": { "start": "node src/index.js", "test": "node test/smoke.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

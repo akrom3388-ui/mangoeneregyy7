@@ -1,0 +1,9 @@
+services:
+  mango:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports: ["127.0.0.1:3000:3000"]   # HTTPS reverse proxy (Caddy/Nginx) ni shu portga ulang
+    volumes: ["mango-data:/data"]
+volumes:
+  mango-data:
